@@ -11,6 +11,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from profile import load_profile, save_profile
 
+try:
+    from streamlit_sortables import sort_items
+    HAS_SORTABLES = True
+except ImportError:
+    HAS_SORTABLES = False
+
 # ---------------------------------------------------------------------------
 # Page config
 # ---------------------------------------------------------------------------
@@ -102,6 +108,18 @@ with tab_persona:
         key="p_vol",
     )
 
+    st.markdown("---")
+    st.markdown("**Persönliche Erfahrungen**")
+    st.caption(
+        "Aus welcher Erfahrung sprichst du? Das Modell wählt jeweils die thematisch passende Erfahrung aus "
+        "und bringt sie kurz und natürlich in Kommentare und Leserbriefe ein. Ein Eintrag pro Zeile."
+    )
+    profile["expertise"] = _list_editor(
+        "",
+        profile.get("expertise", []),
+        key="p_expertise",
+    )
+
 # ============================================================
 # TAB 2 – IDENTITY & TONE
 # ============================================================
@@ -147,50 +165,59 @@ with tab_identity:
 with tab_themes:
     st.subheader("Kampagnenthemen")
     st.caption(
-        "Themen werden nach Priorität gewichtet (1 = höchste Priorität). "
-        "Die Reihenfolge hier bestimmt die Scoring-Gewichte."
+        "Reihenfolge = Priorität. Ziehe Themen per Drag & Drop in die gewünschte Reihenfolge, "
+        "dann **Profil speichern**. Priorität 1 gewinnt bei Zielkonflikten im LLM-Prompt."
     )
 
-    themes = profile["themes"]
+    themes = sorted(profile["themes"], key=lambda t: t["priority"])
+    theme_map = {t["name"]: t for t in themes}
 
-    # --- Add new theme ---
-    with st.expander("➕ Neues Thema hinzufügen"):
-        new_name  = st.text_input("Themenname", key="new_t_name")
-        new_prio  = st.number_input("Priorität", min_value=1, max_value=20, value=len(themes) + 1, key="new_t_prio")
-        new_kws   = st.text_area("Keywords (ein Keyword pro Zeile)", height=100, key="new_t_kw")
-        new_pos   = st.text_area("Position / Standpunkt", height=80, key="new_t_pos")
-        if st.button("Thema hinzufügen", key="add_theme_btn"):
-            if new_name.strip():
-                themes.append(
-                    {
-                        "name":     new_name.strip(),
-                        "priority": int(new_prio),
-                        "keywords": [k.strip() for k in new_kws.splitlines() if k.strip()],
-                        "position": new_pos.strip(),
-                    }
-                )
-                st.success(f"Thema «{new_name.strip()}» hinzugefügt.")
-                st.rerun()
-            else:
-                st.warning("Bitte einen Themenname angeben.")
+    # --- Drag & drop reorder (or ↑/↓ fallback) ---
+    if HAS_SORTABLES:
+        sorted_names = sort_items(
+            [t["name"] for t in themes],
+            direction="vertical",
+            key="theme_sort",
+        )
+        themes = [theme_map[name] for name in sorted_names if name in theme_map]
+    else:
+        st.caption("💡 Für Drag & Drop: `pip3 install streamlit-sortables` ausführen und neu starten.")
+        move_up, move_down = None, None
+        for idx, theme in enumerate(themes):
+            col_u, col_d, col_lbl = st.columns([1, 1, 8])
+            with col_u:
+                if idx > 0 and st.button("↑", key=f"up_{idx}"):
+                    move_up = idx
+            with col_d:
+                if idx < len(themes) - 1 and st.button("↓", key=f"dn_{idx}"):
+                    move_down = idx
+            with col_lbl:
+                st.markdown(f"**#{idx+1}** {theme['name']}")
+        if move_up is not None:
+            themes[move_up], themes[move_up-1] = themes[move_up-1], themes[move_up]
+            st.rerun()
+        if move_down is not None:
+            themes[move_down], themes[move_down+1] = themes[move_down+1], themes[move_down]
+            st.rerun()
 
-    # --- Edit / delete existing themes ---
+    # Reassign priority by position
+    for i, t in enumerate(themes):
+        t["priority"] = i + 1
+
+    st.markdown("---")
+
+    # --- Edit / delete each theme ---
     to_delete = None
     for idx, theme in enumerate(themes):
-        with st.expander(
-            f"{'🥇' if theme['priority'] == 1 else '📌'} "
-            f"Priorität {theme['priority']}: {theme['name']}"
-        ):
-            col_f, col_g = st.columns([3, 1])
-            with col_f:
-                theme["name"] = st.text_input(
-                    "Name", value=theme["name"], key=f"t_name_{idx}"
-                )
-            with col_g:
-                theme["priority"] = st.number_input(
-                    "Priorität", min_value=1, max_value=20,
-                    value=theme["priority"], key=f"t_prio_{idx}"
-                )
+        icons = "🥇" if idx == 0 else ("🥈" if idx == 1 else ("🥉" if idx == 2 else "📌"))
+        with st.expander(f"{icons} #{idx + 1} · {theme['name']}"):
+            col_name, col_del = st.columns([5, 1])
+            with col_name:
+                theme["name"] = st.text_input("Name", value=theme["name"], key=f"t_name_{idx}")
+            with col_del:
+                st.markdown("<br>", unsafe_allow_html=True)
+                if st.button("🗑", key=f"del_t_{idx}", help="Thema löschen"):
+                    to_delete = idx
 
             theme["keywords"] = [
                 k.strip()
@@ -202,7 +229,6 @@ with tab_themes:
                 ).splitlines()
                 if k.strip()
             ]
-
             theme["position"] = st.text_area(
                 "Position / Standpunkt",
                 value=theme.get("position", ""),
@@ -210,19 +236,31 @@ with tab_themes:
                 key=f"t_pos_{idx}",
             )
 
-            if st.button(f"🗑 Thema «{theme['name']}» löschen", key=f"del_t_{idx}"):
-                to_delete = idx
-
     if to_delete is not None:
         deleted_name = themes[to_delete]["name"]
         themes.pop(to_delete)
-        # Re-sort by current priority values
-        themes.sort(key=lambda t: t["priority"])
         st.success(f"Thema «{deleted_name}» gelöscht.")
         st.rerun()
 
-    # Re-sort after edits
-    themes.sort(key=lambda t: t["priority"])
+    # --- Add new theme ---
+    st.markdown("---")
+    with st.expander("➕ Neues Thema hinzufügen"):
+        new_name = st.text_input("Themenname", key="new_t_name")
+        new_kws  = st.text_area("Keywords (ein Keyword pro Zeile)", height=100, key="new_t_kw")
+        new_pos  = st.text_area("Position / Standpunkt", height=80, key="new_t_pos")
+        if st.button("Thema hinzufügen", key="add_theme_btn"):
+            if new_name.strip():
+                themes.append({
+                    "name":     new_name.strip(),
+                    "priority": len(themes) + 1,
+                    "keywords": [k.strip() for k in new_kws.splitlines() if k.strip()],
+                    "position": new_pos.strip(),
+                })
+                st.success(f"Thema «{new_name.strip()}» hinzugefügt.")
+                st.rerun()
+            else:
+                st.warning("Bitte einen Themenname angeben.")
+
     profile["themes"] = themes
 
 # ============================================================

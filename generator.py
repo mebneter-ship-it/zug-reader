@@ -42,6 +42,12 @@ def _build_system_prompt(profile: dict[str, Any]) -> str:
     rules = "\n".join(f"- {r}" for r in profile["writing_rules"])
     roles = ", ".join(persona.get("political_roles", []))
     volunteering = ", ".join(persona.get("voluntary_work", []))
+    expertise_items = profile.get("expertise", [])
+    expertise_block = (
+        "\n\nPERSÖNLICHE ERFAHRUNGEN (bei thematischer Relevanz einmal kurz und natürlich einbringen – nicht erzwingen):\n"
+        + "\n".join(f"- {e}" for e in expertise_items)
+        if expertise_items else ""
+    )
 
     return f"""Du schreibst politische Texte im Namen von {persona['name']}.
 
@@ -52,7 +58,7 @@ def _build_system_prompt(profile: dict[str, Any]) -> str:
 - Partei: {persona['party']}
 - Politische Ämter: {roles}
 - Ehrenamtliches Engagement: {volunteering}
-- Slogan: «{persona['slogan']}»
+- Slogan: «{persona['slogan']}»{expertise_block}
 
 POLITISCHES PROFIL: {identity['political_profile']}
 
@@ -71,7 +77,7 @@ Der Text soll authentisch nach {persona['name']} klingen – bodenständig, juri
 def _build_themes_block(matches: list[dict[str, Any]]) -> str:
     if not matches:
         return ""
-    lines = ["SEINE POSITIONEN ZU DEN RELEVANTEN THEMEN (diese klar vertreten, nicht relativieren):"]
+    lines = ["SEINE POSITIONEN ZU DEN RELEVANTEN THEMEN (nach Wichtigkeit geordnet – bei Zielkonflikten hat das erstgenannte Thema Vorrang):"]
     for m in matches:
         lines.append(
             f"- {m['theme']} (Treffer: {', '.join(m['hits'])}): {m['position']}"
@@ -107,6 +113,7 @@ ANFORDERUNGEN:
 - Kein Angriff auf Personen, aber Kritik an Zuständen und Entscheiden ist erwünscht
 - Schluss mit einer konkreten Forderung oder einem klaren Appell
 - Ich-Perspektive
+- Bringe einmal kurz und natürlich eine persönliche Erfahrung ein, aus der du sprichst – nur wenn sie zum Thema passt, nie erzwungen
 
 Schreibe nur den Kommentartext, ohne Titel oder Überschrift."""
 
@@ -154,6 +161,7 @@ ANFORDERUNGEN:
 - Eigenständiger Text – auch ohne Kenntnis des Artikels verständlich
 - Schluss mit einer konkreten politischen Forderung oder einem klaren Appell
 - Ich-Perspektive, kein Absender oder Grussformel
+- Bringe einmal kurz und natürlich eine persönliche Erfahrung ein, aus der du sprichst – nur wenn sie zum Thema passt, nie erzwungen
 
 Schreibe nur den Leserbrieftext, ohne Titel oder Betreffzeile."""
 

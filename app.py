@@ -148,7 +148,7 @@ with st.sidebar:
 
     st.divider()
     st.subheader("🎯 Mindest-Score")
-    min_score = st.slider("", 1, 50, 5, label_visibility="collapsed")
+    min_score = st.slider("", 1, 50, 3, label_visibility="collapsed")
 
     st.divider()
     st.subheader("🏷 Themen")

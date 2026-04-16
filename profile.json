@@ -61,8 +61,23 @@
       "position": "Zug braucht mehr Wohnraum, der bezahlbar, nachhaltig und gut in die Gemeinden integriert ist."
     },
     {
-      "name": "Wirtschaft mit Verantwortung",
+      "name": "Gesundheit und Prämien",
       "priority": 2,
+      "keywords": [
+        "krankenkasse",
+        "prämien",
+        "gesundheit",
+        "pflege",
+        "versorgung",
+        "prävention",
+        "betreuung",
+        "kosten"
+      ],
+      "position": "Ein gutes Gesundheitssystem muss zugänglich, bezahlbar und alltagstauglich bleiben."
+    },
+    {
+      "name": "Wirtschaft mit Verantwortung",
+      "priority": 3,
       "keywords": [
         "wirtschaft",
         "unternehmen",
@@ -77,8 +92,33 @@
       "position": "Zug soll wirtschaftlich stark bleiben, aber Wachstum muss Verantwortung für Ausbildung, Wohnraum und Lebensqualität mittragen."
     },
     {
+      "name": "Künstliche Intelligenz und gesellschaftlicher Wandel",
+      "priority": 4,
+      "keywords": [
+        "künstliche intelligenz",
+        "artificial intelligence",
+        "arbeitsmarkt",
+        "umschulung",
+        "weiterbildung",
+        "lebenslanges lernen",
+        "digitalisierung",
+        "automatisierung",
+        "innovation",
+        "technologie",
+        "technologische entwicklung",
+        "regulierung",
+        "grundrechte",
+        "datenschutz",
+        "chancengleichheit",
+        "gesellschaftlicher wandel",
+        "fachkräfte",
+        "zukunft der arbeit"
+      ],
+      "position": "Zug ist ein innovativer Standort und soll die Chancen von Künstlicher Intelligenz nutzen. Gleichzeitig müssen wir dafür sorgen, dass Weiterbildung, faire Chancen und der Schutz von Grundrechten mit dieser Entwicklung Schritt halten. Technologie soll dem Menschen dienen – nicht umgekehrt."
+    },
+    {
       "name": "Lebensqualität und Zusammenhalt",
-      "priority": 3,
+      "priority": 5,
       "keywords": [
         "lebensqualität",
         "gemeinde",
@@ -91,34 +131,6 @@
         "betreuung"
       ],
       "position": "Ein erfolgreicher Kanton braucht nicht nur Wohlstand, sondern auch gesellschaftlichen Zusammenhalt und starke lokale Strukturen."
-    },
-    {
-      "name": "Gesundheit und Prämien",
-      "priority": 4,
-      "keywords": [
-        "krankenkasse",
-        "prämien",
-        "gesundheit",
-        "pflege",
-        "versorgung",
-        "prävention",
-        "betreuung",
-        "kosten"
-      ],
-      "position": "Ein gutes Gesundheitssystem muss zugänglich, bezahlbar und alltagstauglich bleiben."
-    },
-    {
-      "name": "Sicherheit und Rechtsstaat",
-      "priority": 5,
-      "keywords": [
-        "sicherheit",
-        "kriminalität",
-        "rechtsstaat",
-        "gericht",
-        "justiz",
-        "ordnung"
-      ],
-      "position": "Sicherheit und Rechtsstaat müssen konsequent, glaubwürdig und ohne populistische Zuspitzung gewährleistet werden."
     },
     {
       "name": "Integration, Ausbildung, Infrastruktur",
@@ -134,6 +146,19 @@
         "ausbildungsplätze"
       ],
       "position": "Wachstum und Zuwanderung müssen mit funktionierender Infrastruktur, Integration und Ausbildungsqualität Schritt halten."
+    },
+    {
+      "name": "Sicherheit und Rechtsstaat",
+      "priority": 7,
+      "keywords": [
+        "sicherheit",
+        "kriminalität",
+        "rechtsstaat",
+        "gericht",
+        "justiz",
+        "ordnung"
+      ],
+      "position": "Sicherheit und Rechtsstaat müssen konsequent, glaubwürdig und ohne populistische Zuspitzung gewährleistet werden."
     }
   ],
   "writing_rules": [
@@ -172,5 +197,8 @@
       "type": "rss",
       "enabled": true
     }
+  ],
+  "expertise": [
+    "Mieter im Kanton Zug, Richter am Strafgericht,  IT Manager in einem globalen Softwarekonzern, Jurist und ehemaliger Anwalt, Vorstand in mehreren Vereinen - insbesondere Wirtschaft und Gesellschaft und Nachbarschaftshilfe, Partner in binationaler Beziehung"
   ]
 }
